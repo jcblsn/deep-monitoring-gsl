@@ -19,6 +19,35 @@ The project will also include a forecast of the lake's surface area using a Baye
 
 Finally, the project will include a web application that allows users to explore the data and forecasts interactively.
 
+## Contents
+
+- `data/`
+- `src/`
+  - `notebooks/`
+  - `scripts/`
+- `reference/`
+- `models/`
+
+## Roadmap
+
+- [x] Acquire and process SAR imagery
+~~- [ ] Produce mask representing ground truth from breaklines file~~
+- [ ] Produce mask representing ground truth from alternate source
+- [ ] Trim SAR data and mask to narrow area around lake within region of interest
+- [ ] Tile SAR data and perform processing steps for model training
+- [ ] Train U-net for image segmentation
+- [ ] Make predictions on tiles, compose to single image and assess performance, iterating as necessary
+- [ ] Assess performance on imagery from different years, times of year, iterating as necessary
+- [ ] Acquire imagery for all available dates, get model predictions for historical lake area
+- [ ] Compare estimates to existing estimates
+- [ ] Build website to display static historical estimates
+- [ ] Write up differences between existing interpolated lake estimates and deep learning estimates
+- [ ] Build infrastructure for ingesting and making predictions for new data using Cloud Composer or Github Actions
+- [ ] Add live estimates to website
+- [ ] Build static forecast model to predict future lake estimates using historical data
+- [ ] Augment website and forecast model to accommodate real-time updates
+- [ ] Finishing touches, distribution, promotion
+
 
 ## Process journal
 
@@ -59,35 +88,6 @@ However, I find that since the LiDAR project was conducted over the course of a 
 **Limitations**
 
 As described in [this paper](https://doi.org/10.3390/w14244030), satellite monitoring of the Great Salt Lake will be limited to months when there is not snow on the ground regardless of what kind of imagery is used.
-
-## Contents
-
-- `data/`
-- `src/`
-  - `notebooks/`
-  - `scripts/`
-- `reference/`
-- `models/`
-
-## Roadmap
-
-- [x] Acquire and process SAR imagery
-~~- [ ] Produce mask representing ground truth from breaklines file~~
-- [ ] Produce mask representing ground truth from alternate source
-- [ ] Trim SAR data and mask to narrow area around lake within region of interest
-- [ ] Tile SAR data and perform processing steps for model training
-- [ ] Train U-net for image segmentation
-- [ ] Make predictions on tiles, compose to single image and assess performance, iterating as necessary
-- [ ] Assess performance on imagery from different years, times of year, iterating as necessary
-- [ ] Acquire imagery for all available dates, get model predictions for historical lake area
-- [ ] Compare estimates to existing estimates
-- [ ] Build website to display static historical estimates
-- [ ] Write up differences between existing interpolated lake estimates and deep learning estimates
-- [ ] Build infrastructure for ingesting and making predictions for new data using Cloud Composer or Github Actions
-- [ ] Add live estimates to website
-- [ ] Build static forecast model to predict future lake estimates using historical data
-- [ ] Augment website and forecast model to accommodate real-time updates
-- [ ] Finishing touches, distribution, promotion
 
 ## Feedback
 
