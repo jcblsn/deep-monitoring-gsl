@@ -162,7 +162,10 @@ cython_debug/
 # ============================================
 # Custom
 
-/src
 /papers
+/models
+/reference
 /data/gee
 .DS_Store
+.Rproj.user
+*.Rproj

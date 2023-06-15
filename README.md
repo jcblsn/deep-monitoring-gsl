@@ -13,7 +13,7 @@ DeepMonitoringGSL is a deep learning-based monitoring resource for tracking and 
 
 Various programs exist to monitor the health of the lake using remote sensing, in-situ, and simulation tools. The state of Utah measures the water level of the lake along with many other characteristics, including inflows in real time. These measurements, along with bathymetric survey data, are used to interpolate the lake's area and volume over time. 
 
-However, there is no existing recurring direct measurement system for the lake's surface area. Understanding the precise extent of the lake's area is particularly important to the concern of dust emissions. This project aims to fill that gap by estimating the lake's surface area using an original deep learning model on synthetic aperture radar (SAR) imagery to provide a new estimate of the lake's surface area every 11 days. The use of SAR imagery instead of optical imagery will allow for estimates regardless of weather conditions. The estimate is composed of measurements of individual areas of concern within the lake, which is valuable for tracking the relative decline of the lake's area in places where pollutants are more highly concentrated.
+However, there is no existing public-facing direct measurement system for the lake's surface area. Understanding the precise extent of the lake's area is particularly important to the concern of dust emissions. This project aims to fill that gap by estimating the lake's surface area using an original deep learning model on synthetic aperture radar (SAR) imagery to provide a new estimate of the lake's surface area every 11 days. The use of SAR imagery instead of optical imagery will allow for estimates regardless of weather conditions. The estimate is composed of measurements of individual areas of concern within the lake, which is valuable for tracking the relative decline of the lake's area in places where pollutants are more highly concentrated.
 
 The project will also include a forecast of the lake's surface area using a Bayesian structural time series model. This will be used to estimate the lake's surface area in the future, which is valuable for planning purposes.
 
@@ -22,72 +22,59 @@ Finally, the project will include a web application that allows users to explore
 ## Contents
 
 - `data/`
+  - `gee/`
+    - `imagery/`
+      - `sentinel-1/`
+      - `sentinel-2/`
+  - `definitions/`
 - `src/`
   - `notebooks/`
   - `scripts/`
 - `reference/`
 - `models/`
+  - `lidar-mask/`
+  - `ndwi-mask/`
+
+## Methodology
+
+For a description of the steps taken to complete this project, please see the [methodology file](METHODOLOGY.md).
 
 ## Roadmap
 
+I detail in very broad terms the steps I have taken and plan to take to complete this project. I will update this section as I make progress. 
+
+**Exploration**
 - [x] Acquire and process SAR imagery
-~~- [ ] Produce mask representing ground truth from breaklines file~~
-- [ ] Produce mask representing ground truth from alternate source
-- [ ] Trim SAR data and mask to narrow area around lake within region of interest
-- [ ] Tile SAR data and perform processing steps for model training
-- [ ] Train U-net for image segmentation
-- [ ] Make predictions on tiles, compose to single image and assess performance, iterating as necessary
+- [ ] Resolve questions about rectangular artifacts present in SAR imagery
+
+**Model surface area**
+- [x] Produce mask representing ground truth from LiDAR breaklines file
+- [ ] Produce mask representing ground truth from optical imagery index
+- [x] Trim SAR data and mask to narrow area around lake within region of interest
+- [x] Tile SAR data and perform processing steps for model training
+- [x] Process combined multi-band SAR imagery for potential improvement
+- [x] Train U-net for image segmentation using LiDAR mask
+- [ ] Train U-net for image segmentation using multi-band SAR imagery with either mask
+- [ ] Train U-net for image segmentation using optical imagery index
+- [x] Make predictions on tiles, compose to single image and assess performance, iterating as necessary
 - [ ] Assess performance on imagery from different years, times of year, iterating as necessary
+
+**Historical estimates and forecasting**
 - [ ] Acquire imagery for all available dates, get model predictions for historical lake area
-- [ ] Compare estimates to existing estimates
-- [ ] Build website to display static historical estimates
-- [ ] Write up differences between existing interpolated lake estimates and deep learning estimates
-- [ ] Build infrastructure for ingesting and making predictions for new data using Cloud Composer or Github Actions
-- [ ] Add live estimates to website
 - [ ] Build static forecast model to predict future lake estimates using historical data
+- [ ] Compare estimates to existing estimates
+- [ ] Write up differences between existing interpolated lake estimates and deep learning estimates
+
+**Deployment**
+- [ ] Dockerize forecast model
+- [ ] Write infrastructure for ingesting and making predictions for new data using Cloud Composer or Github Actions
+
+**Website**
+- [ ] Build website to display static historical estimates
+- [ ] Add live estimates to website
 - [ ] Augment website and forecast model to accommodate real-time updates
 - [ ] Finishing touches, distribution, promotion
-
-
-## Process journal
-
-**1. Become oriented with relevant data**
-
-In `scripts/explore-google-ee.py` I write a .csv file containing all the Sentinel-1 images available in the Google Earth Engine catalog. In `scripts/save-historical-image-metadata.py` I calculate the overlap between all images and the region of interest, which I defined manually using [a web tool](https://geojson.io/) and saved as `data/definitions/preliminary-roi.geojson`. 
-
-I filtered my list of Sentinel-1 images to those that overlap with the region of interest and again further to those that were produced during the same period as the LiDAR survey (described below). This yielded only a few images, although I could have produced more if I had bothered with several imaging times which contained full coverage of the lake in separate tiles.
-
-In `notebooks/exploring-ground-truth-candidates.ipynb` I implement a series of standard processing steps to prepare the images for use in a deep learning model. I also explore the images visually to get a sense of the data.
-
-![](/data/temp/gsl-sar.jpg)
-*A sample of the SAR images available in the Google Earth Engine catalog visualized using `matplotlib`. Two challenges for classification are apparent on inspection: the low-contrast boundaries between water and land in the northwestern part of the lake and the noise visible on the lake's surface as a result of wind.*
-
-Google Earth Engine's imagery has received basic pre-processing by default, and to that I add a few steps:
-- Convert units in the image from dB to linear
-- Apply a Lee-Sigma filter (with size 7x7 and sigma = 0.025) to reduce speckle noise
-- Normalize values to the range [0, 1]
-
-I consider these fairly naive choices but my choices are broadly informed by [this paper](https://doi.org/10.3390/w14244030) and [this paper](https://doi.org/10.1016/j.ophoto.2021.100005) and [this paper](https://www.mdpi.com/2072-4292/11/23/2780) alongside ChatGPT. I explored this process in `notebooks/exploring-ground-truth-candidates.ipynb` and implemented them in `scripts/batch-export-gee-imagery.py`.
-
-**2. Create ground truth mask**
-
-This proves more difficult than I expected. The state of Utah conducted a [LiDAR survey of the Great Salt Lake](https://gis.utah.gov/data/elevation-and-terrain/2016-lidar-gsl/) in 2016 and made available a 1-meter resolution shapefile defining breaklines for areas containing water in and around the lake. 
-
-I download the breakline shapefile and in `scripts/create_mask.py` I convert those lines to polygons and use those to define a GeoTIFF mask with the same dimensions as the Sentinel-1 images. 
-
-However, I find that since the LiDAR project was conducted over the course of a three-month period and represents a collage of measurements from more than a dozen flights, the mask is not an exact representation of the lake's surface area at any single given time. I compare the mask to images from the same time period in `notebooks/compare-mask-and-data.ipynb` using `ipyleaflet` and save several excerpts illustrating the problem:
-
-2016-10-25 (detail)             |  2016-11-18 (detail)
-:-------------------------:|:-------------------------:
-![](/data/temp/mask-match-detail-2016-10-25-a.png)  |  ![](/data/temp/mask-match-detail-2016-11-18-a.png)
-![](/data/temp/mask-match-detail-2016-10-25-b.png)  |  ![](/data/temp/mask-match-detail-2016-11-18-b.png)
-
-<!-- From here, my tentative plan is to produce a mask using MNDWI thresholding from optical satellite imagery and compare that to SAR imagery to see if I can come up with something that matches well enough to train the U-net.  -->
-
-
-**Limitations**
-
-As described in [this paper](https://doi.org/10.3390/w14244030), satellite monitoring of the Great Salt Lake will be limited to months when there is not snow on the ground regardless of what kind of imagery is used.
+- [ ] Make bot for updates?
 
 ## Feedback
 
