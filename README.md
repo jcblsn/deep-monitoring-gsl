@@ -9,7 +9,7 @@ DeepMonitoringGSL is a deep learning-based monitoring resource for tracking and 
 
 <!-- ![](https://www.sltrib.com/resizer/vJyoOr766qOZZBzJfEimKSAGf7k=/900x506/cloudfront-us-east-1.images.arcpublishing.com/sltrib/2UO7VMSOYRFEBKB6XM3NY4BMBU.gif) -->
 
-![Antelope Island - Tony Hallenburg, Unsplash](https://images.unsplash.com/photo-1523643391907-41e69459a06f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80)
+![Antelope Island - Tony Hallenburg, Unsplash](/data/temp/antelope-island.jpg)
 
 Various programs exist to monitor the health of the lake using remote sensing, in-situ, and simulation tools. The state of Utah measures the water level of the lake along with many other characteristics, including inflows in real time. These measurements, along with bathymetric survey data, are used to interpolate the lake's area and volume over time. 
 
